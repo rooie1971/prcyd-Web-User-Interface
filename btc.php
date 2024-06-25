@@ -42,9 +42,6 @@ echo "
 				Name
 			</th>
 			<th>
-				Account
-			</th>
-			<th>
 				Amount
 			</th>
 			<th>
@@ -53,6 +50,7 @@ echo "
 			<th>
 				Time
 			</th>
+			
 		</tr>
 		</thead>
 ";
