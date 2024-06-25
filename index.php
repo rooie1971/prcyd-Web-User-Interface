@@ -5,28 +5,41 @@
 * @license PUBLIC DOMAIN http://unlicense.org
 * @package +Coin - Bitcoin & forks Web Interface
 */
-ini_set("display_errors", false);
+ini_set("display_errors", true);
 $pageid = 1;
 include ("header.php");
 // 7 last transactions; any account
 $trans = $nmc->listtransactions('*', 7);
 $x = array_reverse($trans);
-$bal = $nmc->getbalance("*", 6);	// confirmed balance of wallet 
-$bal3 = $nmc->getbalance("*", 0);	// unconfirmed balance of wallet
-$bal2 = $bal - $bal3;				// unconfirmed transactions underway
-$pbal = number_format($bal,8);
-$pbal2 = number_format($bal2,8);
-$pbal3 = number_format($bal3,8);
-// Calculate EUR balance
-$arr = json_decode(file_get_contents("https://blockchain.info/ticker"),true);
-$eur = $arr['EUR']['last'];
-$peur = number_format($eur,2);
-$pbaleur = number_format($bal*$eur,2);
-// Calculate USD balance from Weighted Average Price
-$usd = $arr['USD']['last'];
-$pusd = number_format($usd,2);
-$pbalusd = number_format($bal*$usd,2);
+// $bal = $nmc->getbalance("*", 6);	// confirmed balance of wallet 
+$bal = $nmc->getbalance();	// confirmed balance of wallet
+$balances = $nmc->getbalances();
+$lockedbal = $balances["locked"];
+$immaturebal = $balances["immature"];
+$pendingbal = $balances["pending"];
+$spendablebal = $balances["spendable"];
 
+// $bal3 = $nmc->getunconfirmedbalance();	// unconfirmed balance of wallet
+// $bal2 = $bal - $bal3;				// unconfirmed transactions underway
+$pbal = number_format($bal,2);
+// $pbal2 = number_format($bal2,8);
+// $pbal3 = number_format($bal3,8);
+// Calculate EUR balance
+// $arr = json_decode(file_get_contents("https://blockchain.info/ticker"),true);
+$arr = json_decode(file_get_contents("https://api.xeggex.com/api/v2/market/getbysymbol/PRCY_USDT"),true);
+$dollar = $arr['lastPrice'];
+$pdollar = number_format($dollar,4);
+$pbaldollar = number_format($bal*$dollar,2);
+// Calculate USD balance from Weighted Average Price
+// $usd = $arr['USD']['last'];
+// $pusd = number_format($usd,2);
+// $pbalusd = number_format($bal*$usd,2);
+
+// Blockchaininfo
+$highestblock = file_get_contents("https://explorer.prcycoin.com/api/getblockcount");
+$currentblock = $nmc->getblockcount();
+$connect = $nmc->getinfo();
+$connections = $connect["connections"];
 function data_uri($file, $mime) 
 {  
   $contents = file_get_contents($file);
@@ -61,17 +74,53 @@ $(document).on("click", ".open-DeBitPay", function () {
 				<div class='row'>
 					<div class='span5'>
 						<h3><div class='bitcoinsymbol'></div></h3>
-						<h3>Confirmed Balance: <font color='green'>{$pbal} BTC</font></h3>
-						<h4>Unconfirmed Balance: <font color='red'>{$pbal3} BTC</font></h4>
-						<h4>Awaiting Confirmation: <font color='red'>{$pbal2} BTC</font></h4>
+						<h3>Total Balance: <font color='green'>{$pbal} PRCY</font></h3>
+						<h4>Locked Balance: <font color='red'>{$lockedbal} PRCY</font> </h4>
+						<h4>Immature balance: <font color='blue'>{$immaturebal} PRCY</font> </h4>
+						<h4>Pending balance: <font color='blue'>{$pendingbal} PRCY</font> </h4>
 						<br>
-						<h3><div class='eurosymbol'></div></h3>
-						<h3>Confirmed Balance: <font color='green'>{$pbaleur} EUR</font></h3>
-						<h4>Trading Price: 1 BTC = <font color='blue'>{$peur} EUR</font></h4>
+						<h3><div class='eursymbol'></div</h3>
+						<h3>Blockchain</div></h3>
+						<h4>Current block: <font color='green'>{$currentblock}</font></h4>
+						<h4>Highest block: <font color='blue'>{$highestblock} </font></h4>
+						<h4>Connections: <font color='red'>{$connections} </font></h4>
 						<br>
 						<h3><div class='usdollarsymbol'></div></h3>
-						<h3>Confirmed Balance: <font color='green'>{$pbalusd} USD</font></h3>
-						<h4>Trading Price: 1 BTC = <font color='blue'>{$pusd} USD</font></h4>
+						<h3>Confirmed Balance: <font color='green'>{$pbaldollar} USD</font></h3>
+						<h4>Trading Price: 1 PRCY = <font color='blue'>{$pdollar} USD</font></h4>
+						<form name=\"unlocken\" action='index.php' method='POST'>
+						<table style=\"width:100%;\">
+						<tr>
+							<td>Passphrase:</td>
+							<td>";
+
+	if (isset($_POST['walletpassphrase']))
+	{
+        $nmc->unlockwallet($_POST['walletpassphrase'],0);
+				echo "
+								<div class='alert alert-success'>
+									<button type='button' class='close' data-dismiss='alert'>&times;</button>
+									Unlocking wallet this will take some time!
+								</div>
+				";												
+	};
+	if ($wallet_encrypted)
+	{
+		echo "
+								<div class='input-append'>
+									<input type='password' placeholder='Wallet Passphrase' name='walletpassphrase'> &nbsp; &nbsp;
+							</td>
+							<td>
+									<input class='btn btn-primary' type='submit' value='Unlock'>
+								</div>
+							</td>	
+		";
+	}
+	
+echo "		
+						</tr>
+						</table>
+						</form>
 						<br>
 						<h3>Send coins:</h3>
 						<form action='send.php' method='POST'>
@@ -83,7 +132,7 @@ $(document).on("click", ".open-DeBitPay", function () {
 							<td>
 <?php 
 	echo "
-								<input type='text' name='fmbalance' value={$bal} readonly></input>	
+								<input type='text' name='fmbalance' value={$spendablebal} readonly></input>	
 	";		
 ?>
 							</td>
@@ -91,31 +140,7 @@ $(document).on("click", ".open-DeBitPay", function () {
 						<tr>
 							<td>To wallet address:</td>
 							<td>
-<?php 
-// addressbook
-	$addressbook = file("addressbook.csv");
-	echo "
-								<select name='addressbook'>
-	";
-	echo "
-									<option value='---'>
-										Use custom to address:
-									</option>
-	";
-	foreach ($addressbook as $line)
-	{
-		$values = explode(";", $line);
-		$address = $values[0];
-		$name = str_replace("\n", "", $values[1]);
-		echo "
-									<option value='{$address}'>
-										{$name} ({$address})
-									</option>
-		";
-	}
-	echo "
-								</select><br>
-	";
+<?php
 	echo "
 								<input type='text' placeholder='To address' name='address'>
 	";
@@ -125,7 +150,7 @@ $(document).on("click", ".open-DeBitPay", function () {
 						<tr>
 							<td>Amount:</td>
 							<td>
-								<input type='text' placeholder='[BTC]' name='amount'>			
+								<input type='text' placeholder='[PRCY]' name='amount'>			
 							</td>
 						</tr>
 						<tr>
@@ -164,7 +189,7 @@ $(document).on("click", ".open-DeBitPay", function () {
 <?php
 	$wainfo = $nmc->getwalletinfo(); 
 							echo "
-								$wainfo[paytxfee] [BTC.kB<sup>-1</sup>]
+								$wainfo[paytxfee] [PRCY.kB<sup>-1</sup>]
 							";
 ?>
 							</td>
@@ -172,80 +197,7 @@ $(document).on("click", ".open-DeBitPay", function () {
 								<a href='#ChangeTransactionFee' class='open-ChangeTransactionFee btn btn-tiny'>Change</a>
 							</td>
 						</tr>
-						<tr>
-							<td>Passphrase:</td>
-							<td>
-<?php
-	if (isset($_POST['PassPhrase']) && isset($_POST['PassPhrase2']))
-	{
-//check both passwords are the same
-		if ($_POST['PassPhrase'] === $_POST['PassPhrase2'])
-		{
-			if (isset($_POST['CurrPassPhrase']))
-			{
-// Change password
-				try
-				{
-					$nmc->walletpassphrasechange($_POST['CurrPassPhrase'], $_POST['PassPhrase']);
-					echo "
-								<div class='alert alert-success'>
-									<button type='button' class='close' data-dismiss='alert'>&times;</button>
-									Wallet passphrase successfully changed.
-								</div>
-					";												
-				} 
-				catch(Exception $e)
-				{
-				 	echo "
-				 				<div class='alert alert-error'>
-						 			<strong>Passphrase error!</strong> Wrong current passphrase entered.
-						 		</div>
-					";
- 				} 
-			}
-			else 
-			{
-// Set password
-				$nmc->encryptwallet($_POST['PassPhrase']);
-				echo "
-								<div class='alert alert-success'>
-									<button type='button' class='close' data-dismiss='alert'>&times;</button>
-									Wallet is now encypted.<br>Keep that passphrase safe!
-								</div>
-				";												
-			}							
-		}
-		else
-		{
-			echo "
-								<div class='alert alert-error'>
-									<button type='button' class='close' data-dismiss='alert'>&times;</button>
-									<strong>Warning!</strong> Passphrases do not match!<br>Wallet encryption not set.
-								</div>
-			";
-		}
-	}
-	if ($wallet_encrypted)
-	{
-		echo "
-								<div class='input-append'>
-									<input type='password' placeholder='Wallet Passphrase' name='walletpassphrase'> &nbsp; &nbsp;
-							</td>
-							<td>
-									<a href='#ChangePassPhrase' class='open-ChangePassPhrase btn btn-tiny'>Change</a>
-								</div>
-							</td>	
-		";
-	}
-	else 
-	{
-		echo "
-								Wallet un-encrypted &nbsp; &nbsp; <a href='#SetPassPhrase' class='open-SetPassPhrase btn btn-tiny'>Set</a>
-							</td>	
-		";
-	}
-?>		
-						</tr>
+						
 						<tr>
 							<td></td>
 							<td>
@@ -268,28 +220,11 @@ $(document).on("click", ".open-DeBitPay", function () {
 <?php 
 // Load address book
 $addresses_arr = array();
-$addressbook = file("addressbook.csv");
-foreach ($addressbook as $line)
-{
-	$values = explode(";", $line);
-	$address = $values[0];
-	$name = str_replace("\n", "", $values[1]);
-	$addresses_arr[$address] = $name;
-}
-// Load my addresses
-$myaddresses = file("myaddresses.csv");
-foreach ($myaddresses as $line)
-{
-	$values = explode(";", $line);
-	$address = $values[0];
-	$name = str_replace("\n", "", $values[1]);
-	$addresses_arr[$address] = $name;
-}
 
 foreach ($x as $x)
 {
 	if($x['amount'] > 0) { $coloramount = "green"; } else { $coloramount = "red"; }
-	if($x['confirmations'] >= 6) { $colorconfirms = "green"; } else { $colorconfirms = "red"; }
+	if($x['confirmations'] >= 100) { $colorconfirms = "green"; } else { $colorconfirms = "red"; }
 	
 //	$date = date(DATE_RFC822, $x['time']);
 	echo "

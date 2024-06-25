@@ -14,18 +14,11 @@
 session_start();
 $wallets = array();
 
-$wallets['wallet 1'] = array("user" => "bitcoin",  
+$wallets['wallet 1'] = array("user" => "user",  
             "pass" =>   "password",      
             "host" =>   "localhost",     
-            "port" =>   8330,
+            "port" =>   59682,
 	    "protocol" => "http");            
-/*
-$wallets['wallet 2'] = array("user" => "username",  
-            "pass" =>   "password",      
-            "host" =>   "localhost",     
-            "port" =>   5000,
-	    "protocol" => "https");            
-*/
 
 if (isset($_POST['currentWallet']))
 	$_SESSION['currentWallet'] = $_POST['currentWallet'];

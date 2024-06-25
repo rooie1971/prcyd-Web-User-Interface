@@ -8,20 +8,18 @@
 ini_set("display_errors", false);
 $pageid = 3;
 include ("header.php");
-$trans = $nmc->listtransactions('*', 100);
+$trans = $nmc->listtransactions();
 $x = array_reverse($trans);
-$bal = $nmc->getbalance("*", 6);	// confirmed balance of wallet 
-$bal3 = $nmc->getbalance("*", 0);	// unconfirmed balance of wallet
-$bal2 = $bal - $bal3;				// unconfirmed transactions underway
-$pbal = number_format($bal,8);
-$pbal2 = number_format($bal2,8);
-$pbal3 = number_format($bal3,8);
+$bal = $nmc->getbalance();	// confirmed balance of wallet 
+// $bal3 = $nmc->getbalance("*", 0);	// unconfirmed balance of wallet
+// $bal2 = $bal - $bal3;				// unconfirmed transactions underway
+$pbal = number_format($bal,2);
+// $pbal2 = number_format($bal2,8);
+//  $pbal3 = number_format($bal3,8);
 echo "
 <div class='content'>
 	<div class='span5'>
-		<h3>Confirmed Balance: <font color='green'>{$pbal} BTC</font></h3>
-		<h4>Unconfirmed Balance: <font color='red'>{$pbal3} BTC</font></h4>
-		<h4>Awaiting Confirmation: <font color='red'>{$pbal2} BTC</font></h4>
+		<h3>Confirmed Balance: <font color='green'>{$pbal} PRCY</font></h3>
 	</div>
 	<div class='span5'>
 		<a href='?orphan=1'>
@@ -61,23 +59,6 @@ echo "
 
 // Load address book
 $addresses_arr = array();
-$addressbook = file("addressbook.csv");
-foreach ($addressbook as $line)
-{
-	$values = explode(";", $line);
-	$address = $values[0];
-	$name = str_replace("\n", "", $values[1]);
-	$addresses_arr[$address] = $name;
-}
-// Load my addresses
-$myaddresses = file("myaddresses.csv");
-foreach ($myaddresses as $line)
-{
-	$values = explode(";", $line);
-	$address = $values[0];
-	$name = str_replace("\n", "", $values[1]);
-	$addresses_arr[$address] = $name;
-}
 
 foreach ($x as $x)
 {

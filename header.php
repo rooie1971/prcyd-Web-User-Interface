@@ -1,7 +1,7 @@
 <?php
 include("config.php");
 include("jsonRPCClient.php");
-include_once('../simplehtmldom/simple_html_dom.php');
+// include_once('../simplehtmldom/simple_html_dom.php');
 include_once('./btc_address_validator.php');
 /**
 * @author Chris S - AKA Someguy123
@@ -28,12 +28,12 @@ catch(exception $e) {
 }
 
 $wallet_encrypted = true;
-try {
- 	$nmc->walletlock();
-}
-catch(Exception $e) { // Wallet is not encrypted
-	$wallet_encrypted = false;
-}
+// try {
+//	$nmc->walletlock();
+// }
+// catch(Exception $e) { // Wallet is not encrypted
+//	$wallet_encrypted = false;
+// }
  
 // Begin bootstrap code
 ?>
@@ -41,9 +41,10 @@ catch(Exception $e) { // Wallet is not encrypted
 <html lang='en'>
 <head>
 	<meta charset='utf-8'>
-	<title>Bitcoin Web UI</title>
+	<title>PRCY Web UI</title>
 	<meta name='description' content=''>
 	<meta name='author' content=''>
+	<link rel="icon" type="image/x-icon" href="/favicon.ico">
 
 	<!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
 	<!--[if lt IE 9]>
@@ -106,27 +107,18 @@ catch(Exception $e) { // Wallet is not encrypted
 	<div class='navbar navbar-fixed-top'>
 		<div class='navbar-inner'>
 			<div class='container'>
-				<a class='brand' href='#'>+Coin WebUI</a>
+				<a class='brand' href='#'>PRCY WebUI</a>
 				<div class='nav-collapse'>
 					<ul class='nav'>
 						<li <?php if ($pageid == 1)	{ echo "class=active"; } ?>> <a href='index.php'>Home</a></li>
 						<li <?php if ($pageid == 2)	{ echo "class=active"; } ?>> <a href='daemon.php'>Daemon Info</a></li>
 						<li <?php if ($pageid == 3)	{ echo "class=active"; } ?>> <a href='btc.php'>Transactions</a></li>
-						<li <?php if ($pageid == 4)	{ echo "class=active"; } ?>> <a href='address.php'>My Addresses</a></li>
-						<li <?php if ($pageid == 5)	{ echo "class=active"; } ?>> <a href='addressbook.php'>Addressbook</a></li>
-						<li <?php if ($pageid == 6)	{ echo "class=active"; } ?>> <a href='index.php'>Move or Send</a></li>
-					</ul>
-				</div><!--/.nav-collapse -->
-				<span style='color: #E4E4E4;'>Select wallet server: &nbsp;</span>
-				<select id='currentWallet' onchange='window.location.href=\"index.php?currentWallet=\"+document.getElementById(\"currentWallet\").value;' style='margin-top: 5px;'>
-<?php
-	foreach ($wallets as $walletName => $walletData)
-		echo "
-					<option id=\"".$walletName."\" ".($currentWallet == $walletName ? "selected" : "").">".$walletName."</option>
-		";
-?>
-				</select>
+						<li <?php if ($pageid == 5)	{ echo "class=active"; } ?>> <a href='masternodes.php'>Masternodes</a></li>
+						
+						<li><a href="">Refresh</a></li>
+				</ul>
+                                </div>
 			</div><!--/.container -->
 		</div><!--/.navbar-inner -->
 	</div><!--/.navbar navbar-fixed-top -->
-	<a href="https://<yourdomain url>/debitpay" target="_blank">open DeBitPay in new tab</a> 
+	

@@ -22,8 +22,6 @@ echo "<div class='content'>
                    echo "<tr><td>".$key."</td><td>".$nwinfo[$key]."</td></tr>";
                    $key = "walletversion";
                    echo "<tr><td>".$key."</td><td>".$wainfo[$key]."</td></tr>";
-                   $key = "balance";
-                   echo "<tr><td>".$key."</td><td>".$wainfo[$key]."</td></tr>";
                    $key = "paytxfee";
                    echo "<tr><td>".$key."</td><td>".$wainfo[$key]."</td></tr>";
                    $key = "relayfee";
@@ -36,8 +34,6 @@ echo "<div class='content'>
                    echo "<tr><td>".$key."</td><td>".$nwinfo[$key]."</td></tr>";
                    $key = "difficulty";
                    echo "<tr><td>".$key."</td><td>".$bcinfo[$key]."</td></tr>";
-                   $key = "warnings";
-                   echo "<tr><td>".$key."</td><td>".$miinfo[$key]."</td></tr>";
              ?>
     	</tbody>
     </table>

@@ -8,7 +8,7 @@
  */
 $pageid = 6;
 include("header.php");
-$toaddr			= ( $_POST['addressbook']	!= "---"	) ? $_POST['addressbook']	: $_POST['address']		;
+$toaddr			= $_POST['address']		;
 $sendamt		= ( $_POST['amount']		== ""		) ? 0						: $_POST['amount']		;
 $fmbalance		= $_POST['fmbalance'];
 
@@ -33,24 +33,12 @@ echo "
 		Validated destination address!<br>
 	</div>
 		";
+        }
 		if ($wallet_encrypted)
 		{
 			try
 			{
-				$nmc->walletpassphrase($_POST['walletpassphrase'], 1);
-				}
-				catch(Exception $e)
-				{
-					echo "
-	<div class='alert alert-error'>
-		<strong>Passphrase Error!</strong> You entered the wrong passphrase while trying to send a payment.
-	</div>
-				";
-				}
-			}
-			try
-			{
-				$nmc->sendtoaddress($toaddr, $sendamt);
+				$nmc->sendtostealthaddress($toaddr, $sendamt);
 				echo "
 	<div class='alert alert-success'>
 		Sending <b>{$sendamt}</b> to <b>{$toaddr}</b>
